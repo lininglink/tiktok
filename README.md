@@ -14,11 +14,12 @@ This gem is not on [rubygems.org](https://rubygems.org). Do not run `gem install
 
 ## Usage
 
-- `Tiktok::Account` takes access_token.
+- `Tiktok::Query` takes access_token.
+- `Tiktok::Query#fetch_account` returns a `Tiktok::Account` object.
 
 ```rb
-account = Tiktok::Account.new(access_token: "act.SmSfTu7...")
-account = account.fetch_user_info
+query = Tiktok::Query.new(access_token: "act.SmSfTu7...")
+account = query.fetch_account
 account.display_name
 ```
 
