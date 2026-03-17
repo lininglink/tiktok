@@ -2,7 +2,23 @@
 
 module Tiktok
   class Video
-    attr_reader :id, :title, :view_count, :like_count, :comment_count, :share_count
+    # Video's unique identifier
+    attr_reader :id
+
+    # Video title
+    attr_reader :title
+
+    # Number of views
+    attr_reader :view_count
+
+    # Number of likes
+    attr_reader :like_count
+
+    # Number of comments
+    attr_reader :comment_count
+
+    # Number of shares
+    attr_reader :share_count
 
     def initialize(data = {})
       @id = data["id"]
