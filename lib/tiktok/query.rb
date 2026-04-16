@@ -15,18 +15,17 @@ module Tiktok
     # If a refresh_token was provided, transparently retries once after
     # exchanging it for a new access_token on TokenInvalid. The optional
     # block is yielded the new token payload so the caller can persist it.
-    def fetch_account(&blk)
-      with_refresh(&blk) { do_fetch_account }
+    def fetch_account
+      with_refresh { do_fetch_account }
     end
 
-    # Fetches videos by id. Same auto-refresh semantics as fetch_account.
-    def fetch_videos(video_ids, &blk)
-      with_refresh(&blk) { do_fetch_videos(Array(video_ids)) }
+    def fetch_videos(video_ids)
+      with_refresh { do_fetch_videos(Array(video_ids)) }
     end
 
     private
 
-    def with_refresh(&blk)
+    def with_refresh
       raise TokenMissing, "access_token is required" if @access_token.nil? || @access_token.empty?
 
       yield
@@ -38,9 +37,12 @@ module Tiktok
 
       @access_token = token_data["access_token"]
       @refresh_token = token_data["refresh_token"] if token_data["refresh_token"]
-      blk&.call(token_data)
+      on_token_refresh(token_data)
 
       yield
+    end
+
+    def on_token_refresh(token_data)
     end
 
     def do_fetch_account
