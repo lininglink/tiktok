@@ -27,6 +27,8 @@ module Tiktok
     private
 
     def with_refresh(&blk)
+      raise TokenMissing, "access_token is required" if @access_token.nil? || @access_token.empty?
+
       yield
     rescue TokenInvalid
       raise unless @refresh_token

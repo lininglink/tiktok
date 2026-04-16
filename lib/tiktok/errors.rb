@@ -14,6 +14,8 @@ module Tiktok
 
   class TokenInvalid < ApiError; end
 
+  class TokenMissing < Error; end
+
   class TokenExpired < Error; end
 
   class TransportError < Error; end
