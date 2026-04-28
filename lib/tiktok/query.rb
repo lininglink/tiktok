@@ -23,6 +23,21 @@ module Tiktok
       with_refresh { do_fetch_videos(Array(video_ids)) }
     end
 
+    # Proactively exchanges the refresh_token for a new access_token.
+    # Returns the token payload (Hash) on success or nil on failure.
+    # Fires on_token_refresh so subscribers can persist the new tokens.
+    def refresh_token
+      raise TokenMissing, "refresh_token is required" if @refresh_token.nil? || @refresh_token.empty?
+
+      token_data = exchange_refresh_token
+      return nil unless token_data
+
+      @access_token = token_data["access_token"]
+      @refresh_token = token_data["refresh_token"] if token_data["refresh_token"]
+      on_token_refresh(token_data)
+      token_data
+    end
+
     private
 
     def with_refresh
