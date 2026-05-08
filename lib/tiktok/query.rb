@@ -4,7 +4,20 @@ module Tiktok
   class Query
     USER_INFO_URL = "https://open.tiktokapis.com/v2/user/info/"
     VIDEO_QUERY_URL = "https://open.tiktokapis.com/v2/video/query/"
+    VIDEO_LIST_URL = "https://open.tiktokapis.com/v2/video/list/"
     TOKEN_URL = "https://open.tiktokapis.com/v2/oauth/token/"
+
+    USER_INFO_FIELDS = %w[
+      open_id avatar_url avatar_url_100 display_name
+      username bio_description
+      follower_count following_count likes_count video_count
+    ].freeze
+
+    VIDEO_FIELDS = %w[
+      id title video_description cover_image_url share_url embed_link
+      create_time duration
+      view_count like_count comment_count share_count
+    ].freeze
 
     def initialize(access_token: nil, refresh_token: nil)
       @access_token = access_token
@@ -19,8 +32,17 @@ module Tiktok
       with_refresh { do_fetch_account }
     end
 
+    # Fetches specific videos by ID using /v2/video/query/.
+    # Requires the video.list scope.
     def fetch_videos(video_ids)
       with_refresh { do_fetch_videos(Array(video_ids)) }
+    end
+
+    # Lists the authenticated user's most recent public videos using
+    # /v2/video/list/. Requires the video.list scope.
+    # Returns a Hash with :videos (Array<Video>), :cursor, and :has_more.
+    def fetch_my_videos(cursor: nil, max_count: 20)
+      with_refresh { do_fetch_my_videos(cursor: cursor, max_count: max_count) }
     end
 
     # Proactively exchanges the refresh_token for a new access_token.
@@ -62,9 +84,7 @@ module Tiktok
 
     def do_fetch_account
       uri = URI.parse(USER_INFO_URL)
-      uri.query = URI.encode_www_form({
-        fields: "open_id,avatar_url,avatar_url_100,display_name,username,bio_description,follower_count,following_count,likes_count"
-      })
+      uri.query = URI.encode_www_form(fields: USER_INFO_FIELDS.join(","))
 
       request = Net::HTTP::Get.new(uri.request_uri)
       request["Authorization"] = "Bearer #{@access_token}"
@@ -77,9 +97,7 @@ module Tiktok
 
     def do_fetch_videos(video_ids)
       uri = URI.parse(VIDEO_QUERY_URL)
-      uri.query = URI.encode_www_form({
-        fields: "id,title,view_count,like_count,comment_count,share_count"
-      })
+      uri.query = URI.encode_www_form(fields: VIDEO_FIELDS.join(","))
 
       request = Net::HTTP::Post.new(uri.request_uri)
       request["Authorization"] = "Bearer #{@access_token}"
@@ -89,6 +107,29 @@ module Tiktok
       data = perform(uri, request)
       check_api_error!(data)
       (data.dig("data", "videos") || []).map { |v| Video.new(v) }
+    end
+
+    def do_fetch_my_videos(cursor:, max_count:)
+      uri = URI.parse(VIDEO_LIST_URL)
+      uri.query = URI.encode_www_form(fields: VIDEO_FIELDS.join(","))
+
+      body = { max_count: max_count }
+      body[:cursor] = cursor if cursor
+
+      request = Net::HTTP::Post.new(uri.request_uri)
+      request["Authorization"] = "Bearer #{@access_token}"
+      request["Content-Type"] = "application/json"
+      request.body = JSON.generate(body)
+
+      data = perform(uri, request)
+      check_api_error!(data)
+
+      videos = (data.dig("data", "videos") || []).map { |v| Video.new(v) }
+      {
+        videos: videos,
+        cursor: data.dig("data", "cursor"),
+        has_more: data.dig("data", "has_more") || false
+      }
     end
 
     def exchange_refresh_token

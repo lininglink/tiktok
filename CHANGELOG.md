@@ -1,5 +1,11 @@
 ## [Unreleased]
 
+## [0.3.0] - 2026-05-08
+
+- Add `Tiktok::Query#fetch_my_videos(cursor:, max_count:)` calling `/v2/video/list/`. Returns `{ videos:, cursor:, has_more: }`.
+- `Tiktok::Account` now exposes `video_count`, fetched alongside the existing follower/following/like counts in `fetch_account`.
+- `Tiktok::Video` now exposes `description`, `cover_image_url`, `share_url`, `embed_link`, `create_time`, and `duration`. `fetch_videos` requests these fields too.
+
 ## [0.2.0] - 2026-03-16
 
 - Add `Tiktok::Query` class as the single API client for all TikTok API calls

@@ -26,6 +26,9 @@ module Tiktok
     # Total number of likes received
     attr_reader :likes_count
 
+    # Total number of public videos the user has posted
+    attr_reader :video_count
+
     def initialize(data = {})
       @open_id = data["open_id"]
       @display_name = data["display_name"]
@@ -35,6 +38,7 @@ module Tiktok
       @follower_count = data["follower_count"]
       @following_count = data["following_count"]
       @likes_count = data["likes_count"]
+      @video_count = data["video_count"]
     end
   end
 end
