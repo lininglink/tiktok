@@ -6,6 +6,7 @@ module Tiktok
     VIDEO_QUERY_URL = "https://open.tiktokapis.com/v2/video/query/"
     VIDEO_LIST_URL = "https://open.tiktokapis.com/v2/video/list/"
     TOKEN_URL = "https://open.tiktokapis.com/v2/oauth/token/"
+    REVOKE_URL = "https://open.tiktokapis.com/v2/oauth/revoke/"
 
     USER_INFO_FIELDS = %w[
       open_id avatar_url avatar_url_100 display_name
@@ -42,6 +43,30 @@ module Tiktok
     # Returns a Hash with :videos (Array<Video>), :cursor, and :has_more.
     def fetch_my_videos(cursor: nil, max_count: 20)
       with_refresh { do_fetch_my_videos(cursor: cursor, max_count: max_count) }
+    end
+
+    # Revokes the access_token at TikTok via /v2/oauth/revoke/. After this
+    # the token can no longer be used to call TikTok APIs even if it had not
+    # yet expired. Best-effort: returns true on success, false otherwise.
+    # Does not raise on transport or API errors so callers can safely chain
+    # this in front of a local-state cleanup.
+    def revoke!
+      raise TokenMissing, "access_token is required" if @access_token.nil? || @access_token.empty?
+
+      uri = URI.parse(REVOKE_URL)
+      request = Net::HTTP::Post.new(uri.request_uri)
+      request["Content-Type"] = "application/x-www-form-urlencoded"
+      request.set_form_data({
+        client_key: ENV["TIKTOK_CLIENT_ID"],
+        client_secret: ENV["TIKTOK_CLIENT_SECRET"],
+        token: @access_token
+      })
+
+      data = perform(uri, request)
+      err = data["error"]
+      err.nil? || err["code"].nil? || err["code"] == "ok"
+    rescue TransportError
+      false
     end
 
     # Proactively exchanges the refresh_token for a new access_token.
