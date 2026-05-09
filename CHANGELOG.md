@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+## [0.3.1] - 2026-05-08
+
+- `fetch_account` no longer requests `follower_count`, `following_count`, `likes_count`, or `video_count`. These require the `user.info.stats` scope, and requesting them without that scope causes TikTok to return `scope_not_authorized`. The `Tiktok::Account` accessors are kept so callers that *do* hold `user.info.stats` can still build an `Account` from a response that includes these fields, but the gem no longer requests them automatically.
+
 ## [0.3.0] - 2026-05-08
 
 - Add `Tiktok::Query#fetch_my_videos(cursor:, max_count:)` calling `/v2/video/list/`. Returns `{ videos:, cursor:, has_more: }`.

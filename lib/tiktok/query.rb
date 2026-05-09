@@ -10,7 +10,6 @@ module Tiktok
     USER_INFO_FIELDS = %w[
       open_id avatar_url avatar_url_100 display_name
       username bio_description
-      follower_count following_count likes_count video_count
     ].freeze
 
     VIDEO_FIELDS = %w[
