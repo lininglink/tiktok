@@ -14,6 +14,8 @@ This gem is not on [rubygems.org](https://rubygems.org). Do not run `gem install
 
 ## Usage
 
+### Calling the API
+
 - `Tiktok::Query` takes access_token.
 - `Tiktok::Query#fetch_account` returns a `Tiktok::Account` object.
 
@@ -21,6 +23,35 @@ This gem is not on [rubygems.org](https://rubygems.org). Do not run `gem install
 query = Tiktok::Query.new(access_token: "act.SmSfTu7...")
 account = query.fetch_account
 account.display_name
+```
+
+### Handles, URLs and sounds
+
+Plain string work on TikTok's own formats. No token and no network call, so these
+are usable for accounts that never logged in.
+
+```rb
+Tiktok::Handle.normalize("  https://www.tiktok.com/@Bloom.NEW?lang=en  ")
+# => "bloom.new"    (a bare handle and "@Bloom.NEW" give the same)
+
+Tiktok::Handle.valid?("bloom.new")   # => true
+Tiktok::Handle.valid?("bloom/one")   # => false
+
+Tiktok::Url.profile("bloom.new")
+# => "https://www.tiktok.com/@bloom.new"
+Tiktok::Url.video("bloom.new", "7529403355681147665")
+# => "https://www.tiktok.com/@bloom.new/video/7529403355681147665"
+
+Tiktok::Sound.music_id("https://www.tiktok.com/music/summer-launch-7529403355681147665")
+# => "7529403355681147665"
+```
+
+In Rails, `Tiktok::Handle::FORMAT` is the anchored regexp behind `valid?`, so it
+drops straight into a validation:
+
+```rb
+normalizes :account_name, with: ->(name) { Tiktok::Handle.normalize(name) }
+validates :account_name, format: { with: Tiktok::Handle::FORMAT, allow_blank: true }
 ```
 
 ## Development

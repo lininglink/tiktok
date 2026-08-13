@@ -1,5 +1,12 @@
 ## [Unreleased]
 
+## [0.5.0] - 2026-08-13
+
+- Add `Tiktok::Handle`, `Tiktok::Url` and `Tiktok::Sound` — the grammar of TikTok's own handles and URLs, with no API call behind any of it. Usable without an access token, unlike everything else in the gem.
+- `Tiktok::Handle.normalize` turns a bare handle, an `@handle` or a full profile URL into the bare lowercase handle; `Tiktok::Handle.valid?` and `Tiktok::Handle::FORMAT` say whether one could have been issued.
+- `Tiktok::Url.profile` and `Tiktok::Url.video` build links from a constant host rather than from a stored URL.
+- `Tiktok::Sound.music_id` reads the id off a sound's page URL, which is the id a post reports as the music it used.
+
 ## [0.4.0] - 2026-05-08
 
 - Add `Tiktok::Query#revoke!` calling `POST /v2/oauth/revoke/`. Best-effort: returns true on success, false on TikTok-side error or transport failure (does not raise), so callers can safely run it before deleting local OAuth state.
