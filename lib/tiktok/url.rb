@@ -36,6 +36,23 @@ module Tiktok
       "#{profile(handle)}/video/#{video_id}"
     end
 
+    # The URL with its query string and fragment dropped.
+    #
+    # Worth doing to anything ShortUrl.resolve hands back: TikTok answers a share
+    # link with the canonical URL followed by a long query naming the account that
+    # shared it — sec_user_id, user_id, a checksum, the device it was shared from.
+    # None of that says anything about the sound or the post, and it does not
+    # belong in a stored URL or on a page. Anything unparseable comes back as it
+    # went in.
+    def self.without_query(url)
+      uri = URI.parse(url.to_s)
+      uri.query = nil
+      uri.fragment = nil
+      uri.to_s
+    rescue URI::InvalidURIError
+      url
+    end
+
     # True only for https URLs on tiktok.com or a subdomain of it.
     #
     # The host is compared whole, not by suffix: "faketiktok.com" ends in

@@ -24,6 +24,31 @@ module Tiktok
         Url.video("@Bloom.NEW", 7529403355681147665)
     end
 
+    def test_without_query_drops_the_share_tokens_tiktok_answers_with
+      resolved = "https://www.tiktok.com/music/Slowed-7660733636526934017" \
+        "?_r=1&sec_user_id=MS4wLjABAAAA&share_music_id=7660733636526934017&user_id=7642096780553077768"
+
+      assert_equal "https://www.tiktok.com/music/Slowed-7660733636526934017",
+        Url.without_query(resolved)
+    end
+
+    def test_without_query_drops_a_fragment_too
+      assert_equal "https://www.tiktok.com/@bloom.new",
+        Url.without_query("https://www.tiktok.com/@bloom.new#top")
+    end
+
+    def test_without_query_leaves_a_url_that_has_none_alone
+      [
+        "https://www.tiktok.com/@bloom.new/video/7529403355681147665",
+        "7529403355681147665",
+        ""
+      ].each { |url| assert_equal url, Url.without_query(url), "for #{url.inspect}" }
+    end
+
+    def test_without_query_hands_junk_back_rather_than_raising
+      assert_equal "http://[bad", Url.without_query("http://[bad")
+    end
+
     def test_tiktok_accepts_tiktok_com_and_its_subdomains_over_https
       %w[
         https://www.tiktok.com/x
