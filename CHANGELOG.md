@@ -4,8 +4,9 @@
 
 - Add `Tiktok::Handle`, `Tiktok::Url` and `Tiktok::Sound` — the grammar of TikTok's own handles and URLs, with no API call behind any of it. Usable without an access token, unlike everything else in the gem.
 - `Tiktok::Handle.normalize` turns a bare handle, an `@handle` or a full profile URL into the bare lowercase handle; `Tiktok::Handle.valid?` and `Tiktok::Handle::FORMAT` say whether one could have been issued.
-- `Tiktok::Url.profile` and `Tiktok::Url.video` build links from a constant host rather than from a stored URL.
+- `Tiktok::Url.profile` and `Tiktok::Url.video` build links from a constant host rather than from a stored URL. `Tiktok::Url.tiktok?`, `.short?`, `.video_id`, `.handle`, `.music_id` and `.canonical?` read one back apart.
 - `Tiktok::Sound.music_id` reads the id off a sound's page URL, which is the id a post reports as the music it used.
+- Add `Tiktok::ShortUrl.resolve`, which follows a `vm.tiktok.com`, `vt.tiktok.com` or `/t/` share link to the canonical post or sound URL it stands for. Bounded at 5 hops, stops as soon as the URL names what it points at, and refuses to follow a `Location` header that leaves TikTok or drops to http. Returns the URL it was given on any failure rather than raising. This is the only part of the gem that reaches the network without an access token.
 
 ## [0.4.0] - 2026-05-08
 
